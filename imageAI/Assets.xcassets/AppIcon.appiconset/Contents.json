@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "filename" : "DImkoy_ios_application_icon_ai_generated_art_6e0c2626-1f68-4ebe-b36a-a178124d2a21.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
