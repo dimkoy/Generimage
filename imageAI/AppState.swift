@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
         case waitingToDownload
         case downloading(percent: Double, downloaded: Int, total: Int)
         case downloaded
-        case uncompressing
+        case uncompressing(Double)
         case readyOnDisk
         case failed(Error)
     }
@@ -88,8 +88,8 @@ final class AppState: ObservableObject {
         let downloader = Downloader(from: url, to: downloadedURL)
         downloadSubscriber = downloader.downloadState.sink { state in
             if case let .downloading(progress, downloaded, total) = state {
+                let percent = (progress * 10000).rounded() / 10000
                 DispatchQueue.main.async {
-                    let percent = (progress * 10000).rounded() / 10000
                     self.state = .downloading(percent: percent, downloaded: downloaded, total: total)
                 }
             }
@@ -100,18 +100,26 @@ final class AppState: ObservableObject {
 
     func unzip() async throws {
         guard downloaded else { return }
-        DispatchQueue.main.async {
-            self.state = .uncompressing
+
+        let unzipProgress = Progress()
+
+        let observation = unzipProgress.observe(\.fractionCompleted) { progress, _ in
+            let percent = (progress.fractionCompleted * 1000).rounded() / 1000
+            DispatchQueue.main.async {
+                self.state = .uncompressing(percent)
+            }
         }
 
         do {
-            try FileManager().unzipItem(at: downloadedURL, to: uncompressPath.url)
+            try FileManager().unzipItem(at: downloadedURL, to: uncompressPath.url, progress: unzipProgress)
         } catch {
             // Cleanup if error occurs while unzipping
             try uncompressPath.delete()
+            observation.invalidate()
             throw error
         }
         try downloadedPath.delete()
+        observation.invalidate()
 
         DispatchQueue.main.async {
             self.state = .readyOnDisk

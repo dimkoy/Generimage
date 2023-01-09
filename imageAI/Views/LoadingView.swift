@@ -26,25 +26,33 @@ struct LoadingView: View {
                 }.buttonStyle(.borderedProminent)
             }
         case let .downloading(progress, downloaded, total):
-            VStack {
-                ProgressView(value: progress, total: 1) {
-                    Text("Loading...")
-                } currentValueLabel: {
-                    HStack {
-                        Text("\((progress * 100).formatted())%")
-                        Spacer()
-                        Text("\(downloaded.formatted(.byteCount(style: .decimal)))/\(total.formatted(.byteCount(style: .decimal)))")
-                    }
+            ProgressView(value: progress, total: 1) {
+                Text("Loading...")
+            } currentValueLabel: {
+                HStack {
+                    Text("\((progress * 100).formatted())%")
+                    Spacer()
+                    Text("\(downloaded.formatted(.byteCount(style: .decimal)))/\(total.formatted(.byteCount(style: .decimal)))")
+                }
 
-                }.frame(maxWidth: 250)
-            }.padding()
+            }.frame(maxWidth: 300)
 
-        case .uncompressing:
-            Text("Uncompressing, do not close the App")
+        case .uncompressing(let progress):
+            ProgressView(value: progress, total: 1) {
+                Text("Uncompressing, do not close the app")
+            } currentValueLabel: {
+                    Text("\((progress * 100).formatted())%")
+            }.frame(maxWidth: 300)
+
         case let .failed(error):
             ErrorPopover(errorMessage: "Could not load model, error: \(error)").transition(.move(edge: .top))
         default:
             Text("Final preparation")
+                .onAppear {
+                    Task {
+                        await appState.prepare()
+                    }
+                }
         }
 
     }
