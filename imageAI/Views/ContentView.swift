@@ -13,7 +13,7 @@ struct ContentView: View {
 
     @State private var generationParameter =
         ImageGenerator.GenerationParameter(
-            prompt: "",
+            prompt: "cyberpunk night street with modern cars",
             negativePrompt: "",
             stepCount: 20,
             imageCount: 1,
@@ -100,10 +100,10 @@ struct PromptView: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack { Text("Prompt:"); Spacer() }
-            TextField("Prompt:", text: $parameter.prompt)
+            TextField("Provide prompt for generated image", text: $parameter.prompt)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             HStack { Text("Negative Prompt:"); Spacer() }
-            TextField("Negative Prompt:", text: $parameter.negativePrompt)
+            TextField("Provide negative prompt for generated image", text: $parameter.negativePrompt)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             Stepper(value: $parameter.imageCount, in: 1...10) {
                 Text("Image Count: \(parameter.imageCount)")
